@@ -1,0 +1,14 @@
+# Normalise line endings to LF in the repo; checkout as CRLF on Windows
+* text=auto
+
+# Force LF for scripts and code (so they run correctly on any OS)
+*.py text eol=lf
+*.sql text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+
+# Binary files — no line ending conversion
+*.docx binary
+*.xlsx binary
+*.zip binary

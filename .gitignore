@@ -1,0 +1,46 @@
+# ── Data files (business data — never commit) ──────────────────────────────
+*.csv
+*.xlsx
+*.xls
+*.zip
+
+# ── Generated script outputs ────────────────────────────────────────────────
+# HTML dashboards produced by visualise scripts
+**/phase*_dashboard.html
+**/phase*js_dashboard.html
+
+# data/ subdirectories used for local working datasets
+**/data/
+
+# ── OS / Editor ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ── Node (for any future JS tooling) ────────────────────────────────────────
+node_modules/
+
+# ── Claude Code project settings (local only) ───────────────────────────────
+.claude/settings.local.json
+
+# ── Legacy / pre-restructure folders (kept locally, not tracked in git) ─────
+BA - Pest Setup Optimisation/
+
+# ── Root-level files superseded by new structure ────────────────────────────
+/flick_run_diagnostic_pilot.html
+/hygiene_run_diagnostic_user_guide.docx
+/run_scoring_methodology.docx
+/VIC Hygiene ABS.csv
