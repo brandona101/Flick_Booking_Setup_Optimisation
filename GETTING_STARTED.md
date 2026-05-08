@@ -20,19 +20,12 @@ Git tracks changes to files and syncs your work with the shared repo.
 ### GitHub account
 If you don't already have one, create a free account at [github.com](https://github.com). Let Brandon know your username so he can add you as a collaborator on the repo.
 
-### Claude Code
-Claude Code is the AI assistant used to work on this project. It runs in the terminal alongside the repo.
+### Claude Code (desktop app)
+Claude Code is the AI assistant used to work on this project. We use the desktop app — no terminal setup required.
 
-1. Install **Node.js** (required by Claude Code) from [nodejs.org](https://nodejs.org) — download the LTS version and run the installer
-2. Open a terminal (**Command Prompt** or **Git Bash**) and install Claude Code:
-   ```bash
-   npm install -g @anthropic-ai/claude-code
-   ```
-3. Once installed, run:
-   ```bash
-   claude
-   ```
-   It will prompt you to log in with your Anthropic account. If you don't have one, go to [claude.ai](https://claude.ai) and sign up. A Claude Pro or Team subscription is required to use Claude Code.
+1. Download the Claude Code desktop app from [claude.ai/download](https://claude.ai/download) and install it
+2. Open the app and log in with your Anthropic account. If you don't have one, sign up at [claude.ai](https://claude.ai) — a Claude Pro or Team subscription is required
+3. That's it. You'll open the project folder from within the app (covered in step 5 below)
 
 ---
 
@@ -120,13 +113,11 @@ Git will flag a **merge conflict**. Don't panic — reach out to Brandon and res
 Claude Code is an AI assistant that understands the full project — its history, scripts, docs, and design decisions — and helps you build and iterate faster.
 
 ### Starting a session
-Open a terminal, navigate to the project folder, and launch Claude:
-```bash
-cd ~/Documents/Flick_Booking_Setup_Optimisation
-claude
-```
+1. Open the **Claude Code desktop app**
+2. Click **Open Folder** (or similar — it may prompt you on first launch) and navigate to your cloned `Flick_Booking_Setup_Optimisation` folder
+3. Claude will read the project context automatically — including `CLAUDE.md` files that contain project-specific guidance on the algorithm, data structure, and business rules
 
-Claude will read the project context automatically (including `CLAUDE.md` files that contain project-specific guidance).
+You can now chat with Claude directly about anything in the project.
 
 ### What Claude can help with
 - **Running and modifying scripts** — ask it to adjust clustering parameters, add a new branch to the ML pipeline, or debug a script
