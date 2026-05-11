@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
 <style>
@@ -804,12 +805,12 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
       <div class="upload-zone-icon-wrap">
         <span class="upload-zone-icon">↑</span>
       </div>
-      <div class="upload-zone-text">Drop your CSV here</div>
+      <div class="upload-zone-text">Drop your file here</div>
       <span class="upload-zone-or">— or —</span>
       <span class="upload-zone-browse">browse files</span>
-      <div class="upload-zone-sub">Booking Setup export from Flick 360 / AGB · .csv only</div>
+      <div class="upload-zone-sub">Booking Setup export from Flick 360 / AGB · .csv or .xlsx</div>
     </label>
-    <input type="file" id="csvInput" accept=".csv">
+    <input type="file" id="csvInput" accept=".csv,.xlsx,.xls">
 
     <div class="upload-meta">
       <div class="upload-meta-item">
@@ -1199,10 +1200,6 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
       <div class="filter-group">
         <select id="freqFilter">
           <option value="all">All frequencies</option>
-          <option value="weekly">Weekly only</option>
-          <option value="2weekly">2-weekly only</option>
-          <option value="4weekly">4-weekly only</option>
-          <option value="long">&gt;4-weekly only</option>
         </select>
       </div>
     </div>
@@ -1464,24 +1461,24 @@ const COLOR_BY_DAY = {
 const COLOR_BY_WEEK = { 1: '#1B2EA6', 2: '#00B0F0', 3: '#B45309', 4: '#C00000' };
 
 function freqToCycleSlots(rec) {
-  if (!rec) return { perCycle: 1, slotsInCycle: [1] };
+  if (!rec) return { perCycle: 1, annualVisits: 13, slotsInCycle: [1] };
   const r = rec.toLowerCase();
-  if (r === '1 weekly') return { perCycle: 4, slotsInCycle: [1,2,3,4] };
-  if (r === '2 weekly') return { perCycle: 2, slotsInCycle: [1,3] };
-  if (r === '4 weekly') return { perCycle: 1, slotsInCycle: [null] };
-  if (r === '6 weekly') return { perCycle: 0.667, slotsInCycle: [null] };
-  if (r === '8 weekly') return { perCycle: 0.5, slotsInCycle: [null] };
-  if (r === '12 weekly') return { perCycle: 0.333, slotsInCycle: [null] };
-  if (r === '14 weekly') return { perCycle: 0.286, slotsInCycle: [null] };
-  if (r === '24 weekly') return { perCycle: 0.167, slotsInCycle: [null] };
-  if (r === '26 weekly') return { perCycle: 0.154, slotsInCycle: [null] };
-  if (r === '52 weekly' || r === 'yearly') return { perCycle: 0.077, slotsInCycle: [null] };
-  if (r === '1 monthly') return { perCycle: 0.92, slotsInCycle: [null] };
-  if (r === '2 monthly') return { perCycle: 0.46, slotsInCycle: [null] };
-  if (r === '3 monthly') return { perCycle: 0.31, slotsInCycle: [null] };
-  if (r === '4 monthly') return { perCycle: 0.23, slotsInCycle: [null] };
-  if (r === '6 monthly') return { perCycle: 0.154, slotsInCycle: [null] };
-  return { perCycle: 0.25, slotsInCycle: [null] };
+  if (r === '1 weekly')                    return { perCycle: 4,     annualVisits: 52,         slotsInCycle: [1,2,3,4] };
+  if (r === '2 weekly')                    return { perCycle: 2,     annualVisits: 26,         slotsInCycle: [1,3] };
+  if (r === '4 weekly')                    return { perCycle: 1,     annualVisits: 13,         slotsInCycle: [null] };
+  if (r === '6 weekly')                    return { perCycle: 0.667, annualVisits: 52/6,       slotsInCycle: [null] };
+  if (r === '8 weekly')                    return { perCycle: 0.5,   annualVisits: 52/8,       slotsInCycle: [null] };
+  if (r === '12 weekly')                   return { perCycle: 0.333, annualVisits: 52/12,      slotsInCycle: [null] };
+  if (r === '14 weekly')                   return { perCycle: 0.286, annualVisits: 52/14,      slotsInCycle: [null] };
+  if (r === '24 weekly')                   return { perCycle: 0.167, annualVisits: 52/24,      slotsInCycle: [null] };
+  if (r === '26 weekly')                   return { perCycle: 0.154, annualVisits: 2,          slotsInCycle: [null] };
+  if (r === '52 weekly' || r === 'yearly') return { perCycle: 0.077, annualVisits: 1,          slotsInCycle: [null] };
+  if (r === '1 monthly')                   return { perCycle: 0.92,  annualVisits: 12,         slotsInCycle: [null] };
+  if (r === '2 monthly')                   return { perCycle: 0.46,  annualVisits: 6,          slotsInCycle: [null] };
+  if (r === '3 monthly')                   return { perCycle: 0.31,  annualVisits: 4,          slotsInCycle: [null] };
+  if (r === '4 monthly')                   return { perCycle: 0.23,  annualVisits: 3,          slotsInCycle: [null] };
+  if (r === '6 monthly')                   return { perCycle: 0.154, annualVisits: 2,          slotsInCycle: [null] };
+  return { perCycle: 0.25, annualVisits: 13, slotsInCycle: [null] };
 }
 
 function parseDatePattern(pattern) {
@@ -1675,18 +1672,110 @@ uploadZone.addEventListener('drop', ev => { if (ev.dataTransfer.files.length) ha
 csvInput.addEventListener('change', ev => { if (ev.target.files.length) handleFile(ev.target.files[0]); });
 document.getElementById('newFileBtn').addEventListener('click', () => { csvInput.value = ''; csvInput.click(); });
 
+// Maps known column name variants (Hygiene export) to the names processData expects (Pest export)
+const COLUMN_ALIASES = {
+  // Hygiene export format
+  'fl_name':              'FL_name',
+  'address':              'Address 1',
+  'unit_quantity':        'setup_quantity',
+  // Commercial Pest / MELCOM export format
+  'FL Name':              'FL_name',
+  'Address':              'Address 1',
+  'Unit Quantity':        'setup_quantity',
+  'Product':              'products',
+  'Billing Account':      'billing_account',
+  'Setup Value':          'setup_value',
+  // Shared across formats
+  'Preferred Technician': '*Preferred Resource'
+};
+
+function normaliseColumns(rows) {
+  return rows.map(row => {
+    const out = {};
+    Object.keys(row).forEach(k => {
+      const canonical = COLUMN_ALIASES[k] || k;
+      out[canonical] = row[k];
+    });
+    return out;
+  });
+}
+
 function handleFile(file) {
   loading.classList.add('active');
-  loadingText.textContent = 'Parsing file…';
-  Papa.parse(file, {
-    header: true, skipEmptyLines: true, encoding: 'UTF-8',
-    complete: (results) => {
-      STATE.originalHeaders = results.meta.fields || [];
-      loadingText.textContent = 'Cleaning data…';
-      setTimeout(() => processData(results.data), 50);
-    },
-    error: (err) => { loading.classList.remove('active'); alert('Failed to parse CSV: ' + err.message); }
-  });
+  loadingText.textContent = 'Parsing file...';
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'xlsx' || ext === 'xls') {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        // Strip hidden flags so all columns/rows are read regardless of Excel visibility
+        if (sheet['!cols']) sheet['!cols'].forEach(c => { if (c) c.hidden = false; });
+        if (sheet['!rows']) sheet['!rows'].forEach(r => { if (r) r.hidden = false; });
+
+        // Recalculate !ref from all actual cells - some exports declare a narrow dimension
+        // that excludes columns added later (e.g. latitude/longitude), causing SheetJS to skip them
+        const cellKeys = Object.keys(sheet).filter(k => !k.startsWith('!'));
+        if (cellKeys.length > 0) {
+          const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1');
+          cellKeys.forEach(addr => {
+            try {
+              const cell = XLSX.utils.decode_cell(addr);
+              if (cell.c < range.s.c) range.s.c = cell.c;
+              if (cell.r < range.s.r) range.s.r = cell.r;
+              if (cell.c > range.e.c) range.e.c = cell.c;
+              if (cell.r > range.e.r) range.e.r = cell.r;
+            } catch(e) {}
+          });
+          sheet['!ref'] = XLSX.utils.encode_range(range);
+        }
+
+        // raw:true reads numbers as JS numbers (avoids locale-dependent formatting of lat/lon)
+        let rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: true, header: 1 });
+
+        // Find the actual header row - scan until we find a row containing 'latitude'
+        // This handles hidden rows sitting above the real header in Excel exports
+        let headerIdx = 0;
+        for (let i = 0; i < Math.min(rows.length, 10); i++) {
+          if (rows[i].some(cell => String(cell).trim().toLowerCase() === 'latitude')) {
+            headerIdx = i;
+            break;
+          }
+        }
+
+        // Re-parse from the detected header row, trimming all column names
+        const headers = rows[headerIdx].map(h => String(h).trim());
+        const dataRows = rows.slice(headerIdx + 1)
+          .filter(r => r.some(cell => cell !== ''))
+          .map(r => {
+            const obj = {};
+            headers.forEach((h, i) => { obj[h] = r[i] !== undefined ? r[i] : ''; });
+            return obj;
+          });
+
+        const normalisedRows = normaliseColumns(dataRows);
+        STATE.originalHeaders = headers;
+        loadingText.textContent = 'Cleaning data...';
+        setTimeout(() => processData(normalisedRows), 50);
+      } catch (err) {
+        loading.classList.remove('active');
+        alert('Failed to parse Excel file: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    Papa.parse(file, {
+      header: true, skipEmptyLines: true, encoding: 'UTF-8',
+      complete: (results) => {
+        STATE.originalHeaders = results.meta.fields || [];
+        loadingText.textContent = 'Cleaning data...';
+        setTimeout(() => processData(normaliseColumns(results.data)), 50);
+      },
+      error: (err) => { loading.classList.remove('active'); alert('Failed to parse CSV: ' + err.message); }
+    });
+  }
 }
 
 function processData(rows) {
@@ -1706,10 +1795,20 @@ function processData(rows) {
     if (!fl_id || !fl_name) { rejected_blank++; return; }
 
     const qty = parseFloat(r['setup_quantity']) || 1;
-    const serviceMin = qty * SERVICE_MIN_PER_UNIT;
+    const division = (r['division'] || r['Division'] || '').trim();
+    const COMMERCIAL_DIVISIONS = ['Commercial Pest', 'Strata'];
+    let serviceMin;
+    if (COMMERCIAL_DIVISIONS.includes(division)) {
+      // Commercial Pest / Strata: use the estimated duration field directly (in minutes)
+      const estDur = parseFloat(r['~New Duration'] || r['Current Duration'] || r['Estimated Duration'] || '');
+      serviceMin = !isNaN(estDur) ? estDur : qty * SERVICE_MIN_PER_UNIT;
+    } else {
+      serviceMin = qty * SERVICE_MIN_PER_UNIT;
+    }
     const recurrence = (r['Recurrence Frequency'] || '').trim();
     const slots = freqToCycleSlots(recurrence);
-    const pattern = parseDatePattern(r['Current Date Pattern']);
+    const patternSource = (r['*New Date Pattern'] || '').trim() || (r['Current Date Pattern'] || '').trim();
+    const pattern = parseDatePattern(patternSource);
 
     let activeWeeks = slots.slotsInCycle.slice();
     if (activeWeeks[0] === null) {
@@ -1725,9 +1824,11 @@ function processData(rows) {
       address: r['Address 1'], city: r.city,
       lat, lon,
       tech,                          // original Preferred Resource
+      division,
       product: r['products'],
       customer: r['billing_account'] || '',
       qty, serviceMin,
+      monthlyServiceMin: serviceMin * slots.annualVisits / 12,
       setupValue: parseFloat(r['setup_value']) || 0,
       recurrence,
       perCycleVisits: slots.perCycle,
@@ -1748,11 +1849,10 @@ function processData(rows) {
 
   STATE.raw = cleaned;
   STATE.setupById = new Map(cleaned.map(s => [s.setup_id, s]));
-  if (rejected_geo > 0) STATE.warnings.push(`${rejected_geo.toLocaleString()} setups dropped — invalid coordinates`);
+  // Xlsx diagnostic — shown when coordinates are failing so we can see what was read
+if (rejected_geo > 0) STATE.warnings.push(`${rejected_geo.toLocaleString()} setups dropped — invalid coordinates`);
   if (rejected_tech > 0) STATE.warnings.push(`${rejected_tech.toLocaleString()} setups dropped — no valid tech (subcontractors / placeholders / unallocated buckets)`);
   if (rejected_blank > 0) STATE.warnings.push(`${rejected_blank.toLocaleString()} setups dropped — missing FL data`);
-  const monthlyCount = cleaned.filter(c => c.isMonthlyFreq).length;
-  if (monthlyCount > 0) STATE.warnings.push(`${monthlyCount.toLocaleString()} setups using "Monthly" recurrence — should be week-based per BSO D2`);
   const noPattern = cleaned.filter(c => !c.day).length;
   if (noPattern > 0) STATE.warnings.push(`${noPattern.toLocaleString()} setups have no day pattern`);
 
@@ -1765,6 +1865,22 @@ function processData(rows) {
    TECH PROFILES + CAPACITY
    ============================================================ */
 function buildTechProfiles() {
+  // Populate frequency filter from actual data
+  const freqSel = document.getElementById('freqFilter');
+  const freqCurrent = freqSel.value;
+  const uniqueFreqs = [...new Set(STATE.raw.map(s => s.recurrence).filter(Boolean))]
+    .sort((a, b) => {
+      const order = f => {
+        const r = f.toLowerCase();
+        const mw = r.match(/^(\d+)\s*weekly$/); if (mw) return parseInt(mw[1]);
+        const mm = r.match(/^(\d+)\s*monthly$/); if (mm) return parseInt(mm[1]) * 4.33;
+        return 999;
+      };
+      return order(a) - order(b);
+    });
+  freqSel.innerHTML = '<option value="all">All frequencies</option>' +
+    uniqueFreqs.map(f => `<option value="${f.toLowerCase()}"${freqCurrent === f.toLowerCase() ? ' selected' : ''}>${f}</option>`).join('');
+
   console.time('[perf] buildTechProfilesCore');
   buildTechProfilesCore();
   console.timeEnd('[perf] buildTechProfilesCore');
@@ -3167,16 +3283,7 @@ function getFilteredSetups() {
     if (s.day && !STATE.filters.days.has(s.day)) return false;
     if (s.activeWeeks.length && !s.activeWeeks.some(w => w === null || STATE.filters.weeks.has(w))) return false;
     if (STATE.filters.branch !== 'all' && s.branch !== STATE.filters.branch) return false;
-    if (STATE.filters.freq !== 'all') {
-      const r = s.recurrence.toLowerCase();
-      if (STATE.filters.freq === 'weekly' && r !== '1 weekly') return false;
-      if (STATE.filters.freq === '2weekly' && r !== '2 weekly') return false;
-      if (STATE.filters.freq === '4weekly' && r !== '4 weekly') return false;
-      if (STATE.filters.freq === 'long') {
-        const lw = ['1 weekly','2 weekly','4 weekly'];
-        if (lw.includes(r)) return false;
-      }
-    }
+    if (STATE.filters.freq !== 'all' && s.recurrence.toLowerCase() !== STATE.filters.freq) return false;
     if (STATE.filters.tech.size > 0 && !STATE.filters.tech.has(getEffectiveTech(s))) return false;
     if (STATE.filters.violationsOnly && !setupIsViolation(s)) return false;
     return true;
@@ -4056,28 +4163,57 @@ function exportNewRuns() {
   const headers = STATE.originalHeaders.slice();
   if (!headers.includes('OVERRIDE_APPLIED')) headers.push('OVERRIDE_APPLIED');
   if (!headers.includes('ORIGINAL_TECH')) headers.push('ORIGINAL_TECH');
-  if (!headers.includes('NEW_DATE_PATTERN')) headers.push('NEW_DATE_PATTERN');
 
-  const lines = [headers.map(csvEscape).join(',')];
+  // Reverse of COLUMN_ALIASES — maps canonical key back to original column name
+  const reverseAliases = Object.fromEntries(
+    Object.entries(COLUMN_ALIASES).map(([orig, canonical]) => [canonical, orig])
+  );
+
+  // Tech column may differ between Pest ('*Preferred Resource') and Hygiene ('Preferred Technician')
+  const techKey = headers.find(h => h === '*Preferred Resource' || h === 'Preferred Technician') || '*Preferred Resource';
+
+  // Booking Recurrence Axis is not required — exclude it from export
+  const exportHeaders = headers.filter(h => h !== 'Booking Recurrence Axis');
+
+  // Day name to %recc_dow_number convention (0=Sun, 1=Mon ... 6=Sat)
+  const DAY_TO_NUM = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
+
+  function parseDatePatternFields(pattern) {
+    if (!pattern) return { weekNum: '', dayNum: '' };
+    const m = String(pattern).match(/^(\d+)-(\w+)$/);
+    if (m) return { weekNum: m[1], dayNum: DAY_TO_NUM[m[2]] != null ? DAY_TO_NUM[m[2]] : '' };
+    const e = String(pattern).match(/Every\s+(\w+)/i);
+    if (e) return { weekNum: '', dayNum: DAY_TO_NUM[e[1]] != null ? DAY_TO_NUM[e[1]] : '' };
+    return { weekNum: '', dayNum: '' };
+  }
+
+  const lines = [exportHeaders.map(csvEscape).join(',')];
   STATE.raw.forEach(s => {
     const row = Object.assign({}, s.originalRow);
+
+    // Re-map any normalised keys back to their original column names so headers align
+    Object.entries(reverseAliases).forEach(([canonical, original]) => {
+      if (exportHeaders.includes(original) && canonical in row) {
+        row[original] = row[canonical];
+      }
+    });
+
     const ov = STATE.overrides.get(s.setup_id);
     if (ov) {
-      row['ORIGINAL_TECH'] = row['*Preferred Resource'] || '';
-      row['*Preferred Resource'] = ov.tech;
+      row['ORIGINAL_TECH'] = row[techKey] || '';
+      if (ov.tech) row[techKey] = ov.tech;
       row['OVERRIDE_APPLIED'] = 'Y';
-      // If new day/week assigned, write as "W-Day" style (matches input pattern)
-      if (ov.day && ov.week) {
-        row['NEW_DATE_PATTERN'] = `${ov.week}-${ov.day}`;
-        // Update the *New Date Pattern field too, if it exists in headers
-        if (headers.includes('*New Date Pattern')) row['*New Date Pattern'] = `${ov.week}-${ov.day}`;
-      } else {
-        row['NEW_DATE_PATTERN'] = '';
+      const newPattern = (ov.day && ov.week) ? `${ov.week}-${ov.day}` : '';
+      if (newPattern) {
+        if (exportHeaders.includes('*New Date Pattern')) row['*New Date Pattern'] = newPattern;
+        const { weekNum, dayNum } = parseDatePatternFields(newPattern);
+        if (exportHeaders.includes('Booking Week Number')) row['Booking Week Number'] = weekNum;
+        if (exportHeaders.includes('Day Number')) row['Day Number'] = dayNum;
       }
     } else {
-      row['ORIGINAL_TECH'] = ''; row['OVERRIDE_APPLIED'] = ''; row['NEW_DATE_PATTERN'] = '';
+      row['ORIGINAL_TECH'] = ''; row['OVERRIDE_APPLIED'] = '';
     }
-    lines.push(headers.map(h => csvEscape(row[h] != null ? row[h] : '')).join(','));
+    lines.push(exportHeaders.map(h => csvEscape(row[h] != null ? row[h] : '')).join(','));
   });
   downloadCsv(lines.join('\n'), `flick_new_runs_${dateStamp()}.csv`);
 
@@ -5263,14 +5399,16 @@ function computeAndShowSelection() {
     if (d < suggestedD) { suggestedD = d; suggested = t; }
   });
   const techDropdownOpts = eligibleTechs.map(t => `
-    <option value="${escapeHtml(t.name)}" ${suggested && t.name === suggested.name ? 'selected' : ''}>
+    <option value="${escapeHtml(t.name)}">
       ${escapeHtml(t.name)} — score ${t.efficiencyScore} · ${haversineKm(cLat, cLon, t.homeLat, t.homeLon).toFixed(0)}km
     </option>`).join('');
 
+  // ── Work hours & site count ──
+  const totalWorkHours = inside.reduce((a,s) => a + (s.monthlyServiceMin || s.serviceMin || 0), 0) / 60;
+  const siteCount = flSet.size;
+
   // ── Colour helpers ──
   const scoreCol = scoreColor(areaScore);
-  const utilCl = avgUtil > 100 ? 'var(--bad)' : avgUtil > 85 ? 'var(--warn)' : 'var(--good)';
-  const prodCl = productivePct >= 60 ? 'var(--good)' : productivePct >= 45 ? 'var(--warn)' : 'var(--bad)';
   const multiCl = multiTechInLasso > 0 ? 'var(--flick-red)' : 'var(--good)';
 
   document.getElementById('selectionPanel').style.display = 'block';
@@ -5285,12 +5423,12 @@ function computeAndShowSelection() {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;text-align:center;">
         <div style="background:var(--flick-grey-100);border-radius:5px;padding:5px 8px;">
-          <div style="font-size:14px;font-weight:700;color:${utilCl};">${avgUtil.toFixed(0)}%</div>
-          <div style="font-size:9px;color:var(--flick-grey-400);text-transform:uppercase;">Avg util</div>
+          <div style="font-size:14px;font-weight:700;color:var(--flick-navy);">${totalWorkHours.toFixed(1)}h</div>
+          <div style="font-size:9px;color:var(--flick-grey-400);text-transform:uppercase;">Avg monthly hrs</div>
         </div>
         <div style="background:var(--flick-grey-100);border-radius:5px;padding:5px 8px;">
-          <div style="font-size:14px;font-weight:700;color:${prodCl};">${productivePct.toFixed(0)}%</div>
-          <div style="font-size:9px;color:var(--flick-grey-400);text-transform:uppercase;">Productive</div>
+          <div style="font-size:14px;font-weight:700;color:var(--flick-navy);">${siteCount}</div>
+          <div style="font-size:9px;color:var(--flick-grey-400);text-transform:uppercase;">Sites</div>
         </div>
         <div style="background:var(--flick-grey-100);border-radius:5px;padding:5px 8px;">
           <div style="font-size:14px;font-weight:700;color:${multiCl};">${multiTechInLasso}</div>
@@ -5322,14 +5460,47 @@ function computeAndShowSelection() {
       ${techRows.length > 8 ? `<div style="font-size:10px;color:var(--flick-grey-400);padding:4px;">+${techRows.length - 8} more techs</div>` : ''}
     </div>
 
+    <!-- REASSIGN: TECH + DAY + WEEK -->
     <div class="selection-action">
-      <h5>Reassign all to…</h5>
+      <div style="font-size:10px;text-transform:uppercase;color:var(--flick-grey-700);font-weight:700;margin-bottom:6px;">Reassign area to…</div>
       ${eligibleSet ? `<div style="font-size:10px;color:var(--flick-navy);font-weight:600;margin-bottom:4px;">Rule-restricted to ${eligibleTechs.length} eligible techs</div>` : ''}
-      <select id="reassignTechSelect">
-        <option value="">— select target tech —</option>
-        ${techDropdownOpts}
-      </select>
-      <button class="selection-apply-btn" id="reassignApplyBtn">Reassign ${inside.length} setups</button>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px;">
+        <div style="grid-column:1/-1;">
+          <label style="font-size:10px;color:var(--flick-grey-700);font-weight:600;display:block;margin-bottom:2px;">Technician (sorted by proximity)</label>
+          <select id="reassignTechSelect" style="width:100%;padding:6px;border:1px solid var(--flick-grey-200);border-radius:4px;font-family:var(--font);font-size:11px;">
+            <option value="">— keep current techs —</option>
+            ${techDropdownOpts}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--flick-grey-700);font-weight:600;display:block;margin-bottom:2px;">Day</label>
+          <select id="reassignDaySelect" style="width:100%;padding:6px;border:1px solid var(--flick-grey-200);border-radius:4px;font-family:var(--font);font-size:11px;">
+            <option value="">Keep existing</option>
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+            <option>Thursday</option><option>Friday</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--flick-grey-700);font-weight:600;display:block;margin-bottom:2px;">Week</label>
+          <select id="reassignWeekSelect" style="width:100%;padding:6px;border:1px solid var(--flick-grey-200);border-radius:4px;font-family:var(--font);font-size:11px;">
+            <option value="">Keep existing</option>
+            <option value="1">Week 1</option><option value="2">Week 2</option>
+            <option value="3">Week 3</option><option value="4">Week 4</option>
+          </select>
+        </div>
+        <div style="grid-column:3;align-self:end;">
+          <div style="font-size:9px;color:var(--flick-grey-400);margin-bottom:2px;">Apply to</div>
+          <select id="reassignFreqSelect" style="width:100%;padding:6px;border:1px solid var(--flick-grey-200);border-radius:4px;font-family:var(--font);font-size:11px;">
+            <option value="all">All setups</option>
+            <option value="weekly">Weekly only</option>
+            <option value="2weekly">2-weekly only</option>
+            <option value="4weekly">4-weekly only</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="selection-apply-btn" id="reassignApplyBtn">Apply to ${inside.length} setups</button>
     </div>
 
     <!-- TOP SUGGESTIONS FOR THIS AREA -->
@@ -5346,26 +5517,44 @@ function computeAndShowSelection() {
           ${areasugs.map(sg => `
             <div style="background:white;border:1px solid var(--flick-grey-200);border-left:3px solid ${sg.type==='critical'?'var(--bad)':sg.type==='travel'?'var(--good)':'var(--warn)'};border-radius:5px;padding:7px 8px;margin-bottom:4px;font-size:11px;">
               <div style="font-weight:700;color:var(--flick-navy);margin-bottom:2px;">${sg.title}</div>
-              <div style="color:var(--flick-grey-700);margin-bottom:4px;line-height:1.4;">${sg.impact}</div>
+              <div style="color:var(--flick-grey-700);line-height:1.4;">${sg.impact}</div>
             </div>
           `).join('')}
-          <div style="font-size:10px;color:var(--flick-grey-400);font-style:italic;">Use "Filter suggestions to this area" to see and apply all of them.</div>
         </div>`;
     })()}
   `;
 
   document.getElementById('filterSugToLassoBtn').addEventListener('click', () => {
     STATE.lassoSuggestionFilter = !STATE.lassoSuggestionFilter;
-    renderAll();
-    computeAndShowSelection();
+    renderAll(); computeAndShowSelection();
   });
+
   document.getElementById('reassignApplyBtn').addEventListener('click', () => {
     const newTech = document.getElementById('reassignTechSelect').value;
-    if (!newTech) { alert('Pick a target technician first'); return; }
-    if (!confirm(`Reassign ${inside.length} setups in this area to ${newTech}?\n\nEach setup will be re-slotted onto the new tech's existing day/week with the closest geographic match.`)) return;
-    inside.forEach(s => {
-      const slot = suggestSlotForSetup(s, newTech);
-      setOverride(s, newTech, slot ? slot.day : null, slot ? slot.week : null, 'lasso', `Lasso reassign — ${inside.length} setups`);
+    const newDay  = document.getElementById('reassignDaySelect').value;
+    const newWeek = document.getElementById('reassignWeekSelect').value;
+    const freqFilter = document.getElementById('reassignFreqSelect').value;
+
+    if (!newTech && !newDay && !newWeek) {
+      alert('Select a tech, day, or week to reassign — or a combination of all three.'); return;
+    }
+
+    let targets = inside.slice();
+    if (freqFilter === 'weekly')  targets = targets.filter(s => (s.recurrence||'').toLowerCase().includes('1 weekly') || (s.recurrence||'').toLowerCase() === 'weekly');
+    if (freqFilter === '2weekly') targets = targets.filter(s => (s.recurrence||'').toLowerCase().includes('2 weekly'));
+    if (freqFilter === '4weekly') targets = targets.filter(s => (s.recurrence||'').toLowerCase().includes('4 weekly'));
+
+    const parts = [];
+    if (newTech) parts.push(`tech → ${newTech}`);
+    if (newDay)  parts.push(`day → ${newDay}`);
+    if (newWeek) parts.push(`week → W${newWeek}`);
+    if (!confirm(`Apply to ${targets.length} setups:\n${parts.join(', ')}\n\nThis will be recorded in the audit trail.`)) return;
+
+    targets.forEach(s => {
+      const effectiveTech = newTech || getEffectiveTech(s);
+      const effectiveDay  = newDay  || getEffectiveDay(s);
+      const effectiveWeek = newWeek ? parseInt(newWeek) : getEffectiveWeek(s);
+      setOverride(s, effectiveTech, effectiveDay, effectiveWeek, 'lasso', `Lasso: ${parts.join(', ')}`);
     });
     clearLasso();
     rebuildAll();

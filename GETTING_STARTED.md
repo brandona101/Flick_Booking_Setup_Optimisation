@@ -1,60 +1,38 @@
-# Getting Started — Flick BSO Project
+# Getting Started - Flick BSO Project
 
-This guide gets you set up to contribute to the Booking Setup Optimisation repo and use it with Claude Code. No prior git experience needed — follow the steps in order.
+This guide gets you set up to contribute to the Booking Setup Optimisation repo and use it with Claude Code. No prior git or coding experience needed.
 
 ---
 
 ## 1. Install the tools
 
-### Git
-Git tracks changes to files and syncs your work with the shared repo.
-
-1. Download from [git-scm.com/downloads](https://git-scm.com/downloads) — pick the Windows installer
-2. Run the installer, accepting all defaults
-3. When done, open **Git Bash** (search for it in the Start menu) and run:
-   ```bash
-   git --version
-   ```
-   You should see something like `git version 2.x.x`. If so, you're good.
-
 ### GitHub account
-If you don't already have one, create a free account at [github.com](https://github.com). Let Brandon know your username so he can add you as a collaborator on the repo.
+Create a free account at [github.com](https://github.com) if you don't have one. Let Brandon know your username so he can add you as a collaborator.
 
 ### Claude Code (desktop app)
-Claude Code is the AI assistant used to work on this project. We use the desktop app — no terminal setup required.
+Claude Code is the AI assistant used to work on this project.
 
 1. Download the Claude Code desktop app from [claude.ai/download](https://claude.ai/download) and install it
-2. Open the app and log in with your Anthropic account. If you don't have one, sign up at [claude.ai](https://claude.ai) — a Claude Pro or Team subscription is required
-3. That's it. You'll open the project folder from within the app (covered in step 5 below)
+2. Open the app and log in - a Claude Pro or Team subscription is required (sign up at [claude.ai](https://claude.ai) if needed)
 
 ---
 
-## 2. Clone the repo
+## 2. Get the repo onto your machine
 
-"Cloning" downloads a full copy of the project to your machine.
+Open Claude Code desktop, then ask it:
 
-1. Open **Git Bash**
-2. Navigate to where you want to keep the project. For example, to put it in your Documents folder:
-   ```bash
-   cd ~/Documents
-   ```
-3. Clone the repo:
-   ```bash
-   git clone https://github.com/brandona101/Flick_Booking_Setup_Optimisation.git
-   ```
-4. Move into the project folder:
-   ```bash
-   cd Flick_Booking_Setup_Optimisation
-   ```
+> "Clone the Flick BSO repo from https://github.com/brandona101/Flick_Booking_Setup_Optimisation.git into my Documents folder"
 
-You now have a local copy of the project. The folder structure looks like this:
+Claude will handle the clone. Once done, open the `Flick_Booking_Setup_Optimisation` folder from within the app - it will read the project context automatically.
+
+The folder structure looks like this:
 
 ```
 Flick_Booking_Setup_Optimisation/
 ├── docs/                    Project proposal and scheduling logic docs
 ├── run-diagnostic/          Run Diagnostic tool (HTML) + user guides
-├── run-maintenance/         Planned — run tuning tooling
-├── run-builder/             Planned — visual run builder
+├── run-maintenance/         Planned - run tuning tooling
+├── run-builder/             Planned - visual run builder
 └── ml-optimisation/
     └── pest/
         └── melbourne-commercial/   Active ML clustering scripts + SQL
@@ -62,97 +40,89 @@ Flick_Booking_Setup_Optimisation/
 
 ---
 
-## 3. Data handling — important
+## 3. Data handling - Important
 
 **Never commit data files to this repo.** Customer and operational data must stay off GitHub.
 
-- Working data (CSV exports from Dynamics 365) goes in the `data/` subfolder inside each component — these are gitignored and will never be uploaded
-- The `.gitignore` file automatically blocks `*.csv`, generated dashboards, and zip files
-- If git ever asks you to commit a `.csv` file, stop and check with Brandon before proceeding
+- Working data (CSV exports from Dynamics 365) goes in the `data/` subfolder inside each component - these are automatically excluded and will never be uploaded
+- If Claude ever lists a `.csv` file as a pending change, stop and check with Brandon before committing
+- The same applies to any file containing site names, addresses, or customer details
+
+**Saving local files you don't want uploaded.** If you want to keep notes, working files, or personal scripts inside the project folder without them going to GitHub, just ask Claude:
+
+> "Add [filename] to the gitignore so it stays local only"
+
+Claude will update the `.gitignore` file so git never picks it up. Useful for scratch files, local exports, or anything else that's useful to you but not relevant to the shared repo.
 
 ---
 
-## 4. Daily workflow
+## 4. Working with Claude and commits - Read this before you start
 
-### Before you start work — pull the latest changes
-Always sync before starting to avoid conflicts with others' work:
-```bash
-git pull
-```
+Claude Code is powerful but will sometimes make changes beyond what you asked for, or suggest commits more frequently than needed. To keep the repo clean and changes easy to review:
 
-### Making changes
-Work on files as normal using your editor of choice. When you're ready to save your changes to the shared repo:
+**Before committing anything, ask Claude:**
+> "Show me a full list of every file that has changed and explain the major modifications in each"
 
-1. **Check what's changed:**
-   ```bash
-   git status
-   ```
+Review that list. If anything looks unrelated to your task, ask Claude to revert those specific files before committing.
 
-2. **Stage the files you want to commit** (be specific — don't use `git add .` blindly):
-   ```bash
-   git add path/to/your/file.py
-   ```
+**One commit per task.** Don't commit after every small step - finish the task, review all changes together, then commit once with a clear summary of what was done and why.
 
-3. **Commit with a clear message:**
-   ```bash
-   git commit -m "Brief description of what changed and why"
-   ```
+**Do not set Claude to "Always Allow" for commits or pushes.** Approve each one individually so you stay in control of what goes to the shared repo. This makes it significantly easier to review history and revert if something goes wrong.
 
-4. **Push to GitHub:**
-   ```bash
-   git push
-   ```
-
-### If two people edit the same file
-Git will flag a **merge conflict**. Don't panic — reach out to Brandon and resolve it together before pushing. Don't force-push or overwrite someone else's work.
+All changes go to your own branch first (covered below) - Pushes will then be reviewed prior to merging to main. 
 
 ---
 
-## 5. Using Claude Code
+## 5. Daily workflow
 
-Claude Code is an AI assistant that understands the full project — its history, scripts, docs, and design decisions — and helps you build and iterate faster.
+### Starting work - sync and create a branch
 
-### Starting a session
-1. Open the **Claude Code desktop app**
-2. Click **Open Folder** (or similar — it may prompt you on first launch) and navigate to your cloned `Flick_Booking_Setup_Optimisation` folder
-3. Claude will read the project context automatically — including `CLAUDE.md` files that contain project-specific guidance on the algorithm, data structure, and business rules
+Always start by getting the latest version of the repo and creating a branch for your work. Ask Claude:
 
-You can now chat with Claude directly about anything in the project.
+> "Fetch and pull the latest changes from the remote, then create a new branch called [your-branch-name]"
 
-### What Claude can help with
-- **Running and modifying scripts** — ask it to adjust clustering parameters, add a new branch to the ML pipeline, or debug a script
-- **Explaining code** — paste a section and ask what it does
-- **Generating outputs** — run Phase 0/1 scripts against a new branch's data export with Claude's help
-- **Writing and editing docs** — update READMEs, draft notes for branch reviews, summarise run outputs
-- **SQL** — modify the AGB export queries for a new branch or data requirement
+Use a short, descriptive branch name - e.g. `brisbane-pest-phase0` or `diagnostic-tool-update`.
 
-### Example prompts to get started
-> "Run the Phase 0 distribution analysis against the data I've placed in ml-optimisation/pest/melbourne-commercial/data/"
+Working on your own branch means your changes stay separate until they are reviewed and merged to main. Never work directly on master.
 
-> "Explain what the tabu-search rebalance step in phase1_clustering.py is doing"
+**Tell Claude which part of the repo your task relates to before you start.** This repo will grow to cover multiple tools and service lines, and Claude reads project context broadly by default. If your task only involves the Melbourne Commercial ML scripts, say so - e.g.:
 
-> "I'm adding Brisbane Commercial Pest — what do I need to set up for a new branch?"
+> "I'm working in ml-optimisation/pest/melbourne-commercial/ only - please focus on that area for this task"
 
-> "The diagnostic tool flagged 14 overloaded slots for this branch. What are the options for fixing that?"
+This keeps Claude's context focused on what's relevant, avoids it touching unrelated parts of the repo, and reduces unnecessary credit usage.
+
+### Making and committing changes
+
+Work through your task with Claude's help. When you're ready to commit:
+
+1. Ask Claude for a full list of changed files and what was modified in each
+2. Review the list - anything unrelated to your task should be questioned or reverted before committing
+3. Once you're happy, ask Claude to commit with a clear summary message
+4. Claude will ask for your approval before committing - review and confirm
+
+### Pushing and requesting a merge
+
+When your task is complete and committed, ask Claude to push your branch:
+
+> "Push my branch to the remote"
+
+### If there's a conflict
+
+If two people have edited the same file, git will flag a conflict. Don't try to resolve it yourself - I (Brandon) am happy to review this to make sure that the changes do not overlap.
+
+---
+
+## 6. Using Claude Code
+
+Claude reads the project context automatically when you open the folder - including the algorithm reference and decision log in `ml-optimisation/pest/melbourne-commercial/`.
 
 ### Things to keep in mind
-- Claude cannot access GitHub, Dynamics 365, or Databricks directly — it works with files you have locally
-- Never paste raw customer data (names, addresses, site details) into the Claude chat — work at the level of exported CSVs in the `data/` folder
-- If Claude makes a code change you're unsure about, use `git diff` to review it before committing
-
----
-
-## 6. Getting help
-
-| Problem | Who to ask |
-|---|---|
-| Git / repo access issues | Brandon Atkinson |
-| Claude Code login / billing | [claude.ai/support](https://claude.ai/support) |
-| Dynamics 365 data exports | Your branch ops or the national team |
-| Script errors / algorithm questions | Brandon Atkinson |
+- Claude works with files on your local machine - it cannot access GitHub, Dynamics 365, or Databricks directly
+- Never paste raw customer data (names, addresses, site details) into the Claude chat
+- Always review changes before committing - see section 4
 
 ---
 
 ## Coming soon
 
-- **Jira integration** — tickets for each component will link directly to this repo once the Jira board is set up. Branch naming and commit message conventions will be updated at that point.
+- **Jira integration** - tickets for each component will link directly to this repo once the Jira board is set up.
