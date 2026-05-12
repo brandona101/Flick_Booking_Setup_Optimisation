@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flick Hygiene Run Diagnostic v2</title>
+<title>Flick Run Planner</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -750,7 +750,7 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
 <div class="topbar">
   <div class="topbar-logo">
     <span class="flick-mark">Flick</span>
-    <h1>Hygiene Run <strong>Diagnostic</strong></h1>
+    <h1>Run <strong>Planner</strong></h1>
     <span class="override-badge" id="overrideBadge" style="display:none;">0 changes pending</span>
   </div>
   <div class="topbar-actions">
@@ -759,7 +759,7 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
     <button class="btn" id="reviewChangesBtn" style="display:none;background:#15803D;color:white;font-weight:700;">👁 Review changes</button>
     <button class="btn btn-secondary" id="settingsBtn" style="display:none;">Settings</button>
     <button class="btn btn-secondary" id="newFileBtn" style="display:none;">Load new file</button>
-    <button class="btn" id="exportReportBtn" disabled>Export diagnostic</button>
+    <button id="exportReportBtn" style="display:none;"></button>
     <button class="btn btn-primary" id="exportRunsBtn" disabled>Export new runs</button>
   </div>
 </div>
@@ -769,31 +769,31 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
     <div class="landing-brand">
       <span class="flick-mark">Flick</span>
       <div class="landing-brand-divider"></div>
-      <span class="landing-brand-tag">Anticimex · Hygiene</span>
+      <span class="landing-brand-tag">Anticimex Group</span>
     </div>
 
     <div class="landing-hero">
       <div class="landing-eyebrow">Operations Tooling</div>
-      <h1 class="landing-headline">Run<strong>Diagnostic</strong></h1>
-      <p class="landing-subline">Visualise current technician runs, surface the optimisation wins, and rebuild the master schedule before exporting back to AGB.</p>
+      <h1 class="landing-headline">Run<strong>Planner</strong></h1>
+      <p class="landing-subline">Plot your entire portfolio on a map, review run structure by tech, day and week, then lasso areas to bulk-reassign into the right runs before exporting back to AGB.</p>
 
       <div class="landing-features">
         <div class="landing-feature">
           <div class="landing-feature-num">01</div>
-          <div class="landing-feature-text"><strong>Diagnose</strong> — every booking on the map, scored by run efficiency, capacity utilisation and revenue per day.</div>
+          <div class="landing-feature-text"><strong>Visualise</strong> — every setup on the map coloured by technician. Filter by day, week, frequency, or tech to isolate any run.</div>
         </div>
         <div class="landing-feature">
           <div class="landing-feature-num">02</div>
-          <div class="landing-feature-text"><strong>Optimise</strong> — apply suggested changes one tech at a time, lasso whole areas to reassign, cover absences with one click.</div>
+          <div class="landing-feature-text"><strong>Reassign</strong> — lasso any area to bulk-assign tech, day of week, and week of month in one action. Workload shown as avg monthly hrs (Pest) or avg 4-weekly hrs (Hygiene).</div>
         </div>
         <div class="landing-feature">
           <div class="landing-feature-num">03</div>
-          <div class="landing-feature-text"><strong>Export</strong> — download a new runs file ready to drop straight into AGB, with a full audit trail of every change.</div>
+          <div class="landing-feature-text"><strong>Export</strong> — download the updated runs file ready to drop straight into AGB, with a full audit trail of every change.</div>
         </div>
       </div>
     </div>
 
-    <div class="landing-foot">v7 · Hygiene Operations · Built for Branch Managers</div>
+    <div class="landing-foot">v1 · Run Planner · Built for Branch Managers</div>
   </div>
 
   <div class="landing-right">
@@ -1208,11 +1208,11 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
       <input type="text" class="search-box" id="techSearch" placeholder="Search techs…">
       <div class="tech-list-controls">
         <select id="techSort">
-          <option value="score-asc">Sort: Worst score first</option>
-          <option value="score-desc">Sort: Best score first</option>
-          <option value="load-desc">Sort: Most loaded first</option>
-          <option value="setups-desc">Sort: Most setups first</option>
           <option value="alpha">Sort: A-Z</option>
+          <option value="setups-desc">Sort: Most setups first</option>
+          <option value="load-desc">Sort: Most loaded first</option>
+          <option value="score-asc" style="display:none;"></option>
+          <option value="score-desc" style="display:none;"></option>
         </select>
       </div>
       <div style="font-size:10px;margin:4px 0;">
@@ -1278,48 +1278,39 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
 
     <!-- BRANCH VIEW — shown when no tech selected -->
     <div id="branchView">
-      <h3 class="section-h">Ask the tool</h3>
-      <div style="font-size:10px;color:var(--flick-grey-700);margin-bottom:4px;">
-        Ask anything about your runs, coverage gaps, or what to do: <em>"get coverage in Port Augusta"</em> · <em>"who's closest to Bendigo"</em> · <em>"Dolores spread"</em>
+      <!-- Ask tool / scoring hidden in Run Planner — stubs keep JS happy -->
+      <div style="display:none;">
+        <input type="text" id="smartSearchInput">
+        <button id="smartSearchBtn"></button>
+        <div id="smartSearchResults"></div>
+        <div id="headlineScore"></div>
+        <div id="detailsToggle"></div>
+        <div id="kpiGridDetails"></div>
       </div>
-      <div style="display:flex;gap:4px;margin-bottom:4px;">
-        <input type="text" id="smartSearchInput" placeholder="Ask anything about your runs…" class="search-box" style="margin:0;flex:1;">
-        <button class="btn btn-primary" id="smartSearchBtn" style="padding:7px 12px;">Ask</button>
-      </div>
-      <div id="smartSearchResults" style="margin-bottom:14px;"></div>
-
-      <div class="headline-score" id="headlineScore"></div>
 
       <h3 class="section-h">Snapshot</h3>
       <div class="kpi-grid" id="kpiGrid"></div>
-
-      <h3 class="section-h" id="detailsToggle" style="cursor:pointer;">More details ▾</h3>
-      <div id="kpiGridDetails" style="display:none;"></div>
     </div>
 
     <!-- Heatmap always visible, scoped to current selection -->
-    <h3 class="section-h" id="heatmapLabel">Workload heatmap (cycle hours)</h3>
+    <h3 class="section-h" id="heatmapLabel">Workload heatmap (avg period hrs)</h3>
     <div class="heatmap" id="heatmap"></div>
 
-    <h3 class="section-h with-count">Suggested actions <span class="count-pill" id="suggestionCount">0</span></h3>
-    <div id="suggestionScopeBadge"></div>
-    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;font-size:11px;">
-      <span style="color:var(--flick-grey-700);font-weight:600;">For tech:</span>
-      <select id="suggestionTechSelect" style="flex:1;padding:5px;border:1px solid var(--flick-grey-200);border-radius:4px;font-family:var(--font);font-size:11px;">
-        <option value="">All techs</option>
-      </select>
-      <button class="btn" id="applyAllForTechBtn" style="padding:5px 10px;font-size:10px;" disabled>Apply all</button>
+    <!-- Suggestions / outliers hidden in Run Planner — stubs keep JS happy -->
+    <div style="display:none;">
+      <span id="suggestionCount"></span>
+      <div id="suggestionScopeBadge"></div>
+      <select id="suggestionTechSelect"></select>
+      <button id="applyAllForTechBtn"></button>
+      <div id="suggestionTabs">
+        <button data-tab="critical"><span id="tabCount-critical"></span></button>
+        <button data-tab="grouping"><span id="tabCount-grouping"></span></button>
+        <button data-tab="travel"><span id="tabCount-travel"></span></button>
+        <button data-tab="applied"><span id="tabCount-applied"></span></button>
+      </div>
+      <div id="suggestionList"></div>
+      <div id="outlierList"></div>
     </div>
-    <div class="suggestion-tab-bar" id="suggestionTabs">
-      <button class="suggestion-tab active" data-tab="critical">Critical <span class="tab-pill" id="tabCount-critical">0</span></button>
-      <button class="suggestion-tab" data-tab="grouping">Grouping <span class="tab-pill" id="tabCount-grouping">0</span></button>
-      <button class="suggestion-tab" data-tab="travel">Travel <span class="tab-pill" id="tabCount-travel">0</span></button>
-      <button class="suggestion-tab" data-tab="applied">Applied <span class="tab-pill" id="tabCount-applied">0</span></button>
-    </div>
-    <div id="suggestionList"></div>
-
-    <h3 class="section-h">Outliers</h3>
-    <div class="outlier-list" id="outlierList"></div>
 
     <h3 class="section-h with-count">Audit trail <span class="count-pill" id="auditCount">0</span></h3>
     <div style="display:flex;gap:6px;margin-bottom:6px;">
@@ -1334,7 +1325,7 @@ body { font-family: var(--font); font-size: 13px; color: var(--flick-text); back
 /* eslint-disable */
 
 /* ============================================================
-   FLICK HYGIENE RUN DIAGNOSTIC v2 — JavaScript
+   FLICK RUN PLANNER v1 — JavaScript
    ============================================================ */
 
 // Anthropic API key — set via Settings modal. Session only.
@@ -1350,7 +1341,7 @@ const STATE = {
   suggestions: [],
   view: 'tech',
   activeTab: 'critical',
-  techSort: 'score-asc',
+  techSort: 'alpha',
   filters: {
     days: new Set(['Monday','Tuesday','Wednesday','Thursday','Friday']),
     weeks: new Set([1,2,3,4]),
@@ -1829,6 +1820,11 @@ function processData(rows) {
       customer: r['billing_account'] || '',
       qty, serviceMin,
       monthlyServiceMin: serviceMin * slots.annualVisits / 12,
+      // displayMin: normalised workload unit for heatmap/metrics
+      // Hygiene → avg per 4-weekly cycle; Pest / all others → avg monthly
+      displayMin: division.toLowerCase().includes('hygiene')
+        ? slots.perCycle * serviceMin
+        : serviceMin * slots.annualVisits / 12,
       setupValue: parseFloat(r['setup_value']) || 0,
       recurrence,
       perCycleVisits: slots.perCycle,
@@ -1837,7 +1833,7 @@ function processData(rows) {
       activeWeeks,
       day: pattern.day,
       week: pattern.week,
-      branch: lat > SA_LAT_THRESHOLD ? 'sa' : 'vic',
+      branch: (r['%setup_branch'] || r['service_branch'] || (lat > SA_LAT_THRESHOLD ? 'SA' : 'VIC')).trim(),
       timeWindowStart: r['%timewindow_start'],
       timeWindowEnd: r['%timewindow_end'],
       isMonthlyFreq: recurrence.toLowerCase().includes('monthly'),
@@ -1849,12 +1845,12 @@ function processData(rows) {
 
   STATE.raw = cleaned;
   STATE.setupById = new Map(cleaned.map(s => [s.setup_id, s]));
-  // Xlsx diagnostic — shown when coordinates are failing so we can see what was read
-if (rejected_geo > 0) STATE.warnings.push(`${rejected_geo.toLocaleString()} setups dropped — invalid coordinates`);
-  if (rejected_tech > 0) STATE.warnings.push(`${rejected_tech.toLocaleString()} setups dropped — no valid tech (subcontractors / placeholders / unallocated buckets)`);
-  if (rejected_blank > 0) STATE.warnings.push(`${rejected_blank.toLocaleString()} setups dropped — missing FL data`);
+
+  if (rejected_geo > 0) STATE.warnings.push(`${rejected_geo.toLocaleString()} setups dropped — coordinates outside Australia (check lat/lon columns)`);
+  if (rejected_tech > 0) STATE.warnings.push(`${rejected_tech.toLocaleString()} setups dropped — no valid technician assigned`);
+  if (rejected_blank > 0) STATE.warnings.push(`${rejected_blank.toLocaleString()} setups dropped — missing FL ID or name`);
   const noPattern = cleaned.filter(c => !c.day).length;
-  if (noPattern > 0) STATE.warnings.push(`${noPattern.toLocaleString()} setups have no day pattern`);
+  if (noPattern > 0) STATE.warnings.push(`${noPattern.toLocaleString()} setups have no day pattern — will appear on map but not in day/week filter views`);
 
   loadingText.textContent = 'Building tech profiles…';
   console.time('[perf] buildTechProfiles');
@@ -1880,6 +1876,13 @@ function buildTechProfiles() {
     });
   freqSel.innerHTML = '<option value="all">All frequencies</option>' +
     uniqueFreqs.map(f => `<option value="${f.toLowerCase()}"${freqCurrent === f.toLowerCase() ? ' selected' : ''}>${f}</option>`).join('');
+
+  // Populate branch filter from actual data
+  const branchSel = document.getElementById('branchFilter');
+  const branchCurrent = branchSel.value;
+  const uniqueBranches = [...new Set(STATE.raw.map(s => s.branch).filter(Boolean))].sort();
+  branchSel.innerHTML = `<option value="all">All branches</option>` +
+    uniqueBranches.map(b => `<option value="${escapeHtml(b)}"${branchCurrent === b ? ' selected' : ''}>${escapeHtml(b)}</option>`).join('');
 
   console.time('[perf] buildTechProfilesCore');
   buildTechProfilesCore();
@@ -2606,11 +2609,13 @@ function launchApp() {
     STATE.filters.freq = 'all';
     STATE.filters.branch = 'all';
     STATE.filters.techSearch = '';
+    // Reset filter UI to match
     document.getElementById('branchFilter').value = 'all';
     document.getElementById('freqFilter').value = 'all';
   }
 
   populateTechList();
+  // Yield to browser so loading screen actually disappears before heavy render
   setTimeout(() => {
     renderAll();
   }, 0);
@@ -3666,7 +3671,7 @@ function renderHeatmap(filtered) {
   filtered.forEach(s => {
     if (!s.day) return;
     s.activeWeeks.forEach(w => {
-      if (grid[w] && grid[w][s.day] !== undefined) grid[w][s.day] += s.serviceMin;
+      if (grid[w] && grid[w][s.day] !== undefined) grid[w][s.day] += s.displayMin;
     });
   });
   let maxV = 0;
@@ -3887,8 +3892,8 @@ function renderTechFocusCard() {
     focusPanel.style.display = 'none';
     branchView.style.display = 'block';
     if (heatmapLabel) heatmapLabel.textContent = STATE.filters.tech && STATE.filters.tech.size > 1
-      ? `Workload heatmap — ${STATE.filters.tech.size} techs selected`
-      : 'Workload heatmap (cycle hours)';
+      ? `Workload heatmap — ${STATE.filters.tech.size} techs selected (avg period hrs)`
+      : 'Workload heatmap (avg period hrs)';
     return;
   }
   const selectedName = Array.from(STATE.filters.tech)[0];
@@ -4188,8 +4193,9 @@ function exportNewRuns() {
   // Booking Recurrence Axis is not required — exclude it from export
   const exportHeaders = headers.filter(h => h !== 'Booking Recurrence Axis');
 
-  // Map canonical key → original column name actually present in exportHeaders.
-  // Built per-export so Hygiene ('fl_name') and Pest ('FL Name') both resolve correctly.
+  // Map canonical key → original column name that is actually present in exportHeaders.
+  // Built per-export so it works for both Hygiene ('fl_name', 'address', 'unit_quantity')
+  // and Pest/MELCOM ('FL Name', 'Address', 'Unit Quantity') without overwriting conflicts.
   const canonicalToExport = {};
   Object.entries(COLUMN_ALIASES).forEach(([orig, canonical]) => {
     if (exportHeaders.includes(orig)) canonicalToExport[canonical] = orig;
@@ -5425,7 +5431,7 @@ function computeAndShowSelection() {
   const totalWorkHours = inside.reduce((a,s) => a + (s.monthlyServiceMin || s.serviceMin || 0), 0) / 60;
   const siteCount = flSet.size;
 
-  // ── Date pattern breakdown ──
+  // ── Date pattern breakdown — show distribution of day+week in selection ──
   const patternCounts = new Map();
   inside.forEach(s => {
     const d = getEffectiveDay(s) || '—';
